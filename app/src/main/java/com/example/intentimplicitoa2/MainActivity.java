@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
             //if (miVersion=ZZZ >= 23)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 //Codigo nuevo para llamadas
+                //TODO nuevo codigo
             } else {
                 //Codigo para dispositivos antiguos
                 activarLlamadaVersionesAntiguas();
