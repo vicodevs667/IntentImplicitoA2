@@ -1,6 +1,7 @@
 package com.example.intentimplicitoa2;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
@@ -20,6 +21,10 @@ public class MainActivity extends AppCompatActivity {
     //Atributos primitivos de clase
     private String numeroTelefono;
 
+    //Atributos codigos diferentes Servicios Android
+    private final int PHONE_CODE = 100;
+    private final int CAMERA_CODE = 50;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +35,15 @@ public class MainActivity extends AppCompatActivity {
             obtenerInformacion();
             configurarIntentImplicito();
         });
+        btnCamara.setOnClickListener(view -> {
+            activarCamara();
+        });
+    }
+
+    private void activarCamara() {
+        //configurar el Intent Implicito para activar la camara
+        Intent intentCamara = new Intent("android.media.action.IMAGE_CAPTURE");
+        startActivityForResult(intentCamara, CAMERA_CODE);
     }
 
     private void configurarIntentImplicito() {
@@ -40,13 +54,14 @@ public class MainActivity extends AppCompatActivity {
             //if (miVersion=ZZZ >= 23)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 //Codigo nuevo para llamadas
-                //TODO nuevo codigo
+                requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, PHONE_CODE);
             } else {
                 //Codigo para dispositivos antiguos
                 activarLlamadaVersionesAntiguas();
             }
         }
     }
+
 
     private void activarLlamadaVersionesAntiguas() {
         //Configurar un Intent Implícito
@@ -76,6 +91,31 @@ public class MainActivity extends AppCompatActivity {
     private boolean revisarPermisos(String permiso) {
         int valorPermiso = this.checkCallingOrSelfPermission(permiso);
         return valorPermiso == PackageManager.PERMISSION_GRANTED;
+    }
+
+    //Sobreescribir un metodo del padre
+    //para ajustar nuestra peticion en la respuesta
+    //de la evaluacion de permisos
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PHONE_CODE:
+                String permiso = permissions[0];
+                int valorPermisoOtorgado = grantResults[0];
+                if (permiso.equals(Manifest.permission.CALL_PHONE)) {
+                    //Evaluar si el permiso fue otorgado o no
+                    if (valorPermisoOtorgado == PackageManager.PERMISSION_GRANTED) {
+                        Intent intentLlamada = new Intent(Intent.ACTION_CALL, Uri.parse("tel:"+numeroTelefono));
+                        startActivity(intentLlamada);
+                    }
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                break;
+        }
+
     }
 }
 
